@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title> money management </title>
+<link rel="apple-touch-icon" href="https://i.imgur.com/YRfTLAV.jpg">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =========================
+   全体設定
+========================= */
+
+/* 幅ズレ防止（超重要） */
+* {
+  box-sizing: border-box;
+}
+
+/* 背景＆ベース文字サイズ */
+body {
+  font-family: 
+    'EB Garamond',        /* 英語これ */
+    'M PLUS Rounded 1c',  /* 日本語これ */
+    sans-serif;
+
+  padding: 20px;
+  background: #e8f5e9; /* パステル黄緑 */
+  font-size: 18px; /* 全体大きめ */
+  
+  color: #5d4037; /* 文字の色茶色 */
+}
+
+
+/* =========================
+   見出し
+========================= */
+h2 {
+  margin-top: 25px;
+  font-size: 22px;
+  text-align: center;
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+/* =========================
+   入力カード
+========================= */
+.input-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: none;
+  border: 2px solid #d7ccc8;
+  margin-bottom: 10px;/* 入力エリアとの距離 */
+}
+
+/* 入力・セレクト・ボタン共通 */
+.input-card input,
+.input-card select,
+.input-card button {
+  display: block;
+  width: 100%;
+  margin: 12px 0;
+  padding: 16px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+
+  color: #5d4037; /* ← 入力文字も茶色に */
+}
+
+/* プレースホルダー */
+.input-card input::placeholder {
+  color: #a1887f; /* 少し薄い茶色 */
+}
+
+/* 入力フォーカス時（触ってる感） */
+input:focus,
+select:focus {
+  outline: none;
+  border: 2px solid #a5d6a7;
+}
+
+/* セレクトの見た目統一（iPhone対策） */
+select {
+  appearance: none;
+}
+
+/* 誰に払ったかのボックスと誰がを分割する */
+.row {
+  display: flex;
+  gap: 10px;
+}
+.row select {
+  flex: 1;
+}
+
+
+/* =========================
+   メインボタン（追加）
+========================= */
+#mainBtn {
+  background: #81c784;
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 18px;
+}
+
+
+/* =========================
+   精算結果
+========================= */
+.result-box {
+  font-size: 32px;
+  font-weight: bold;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 15px;
+  text-align: center;
+}
+/* =========================
+   精算結果レイアウト
+========================= */
+
+.result-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 22px;
+  flex-wrap: nowrap;  /* ← 強制1行 */
+}
+
+/* アイコン＋名前セット */
+.result-user {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 大きめアイコン */
+.icon-result {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* 名前タグ */
+.result-name {
+  font-size: 12px;        /* 小さくする */
+  margin-top: 3px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #f1f8e9;
+  white-space: nowrap;    /* ← 改行防止（超重要） */
+}
+
+/* 精算結果の金額（目立たせる＆改行防止） */
+.result-amount {
+  font-size: 26px;
+  font-weight: bold;
+  color: #e91e63;         /* 一覧と同じ赤 */
+  white-space: nowrap;    /* ← 10万でも改行しない */
+}
+
+/* 矢印 */
+.arrow {
+  font-size: 26px;
+  font-weight: bold;
+}
+/* =========================
+   一覧（リスト）
+========================= */
+
+/* 各アイテムカード */
+li {
+  list-style: none;
+  background: transparent;
+  margin: 8px 0;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  font-size: 18px;
+  
+  overflow: hidden;
+   /* スワイプ感　*/
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  transform-origin: center;
+  touch-action: pan-y;
+  /* ゴミ箱アイコン　*/
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
+
+/* 上段（名前と金額） */
+.item-top {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+}
+
+/* メモ */
+.memo {
+  font-size: 14px;
+  color: #666;
+  margin-top: 3px;
+}
+
+/* 誰の分を払ったかのアイコン */
+.memo-icons {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.memo-icons img {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ボタンエリア */
+.buttons {
+  margin-top: 10px;
+}
+
+/* 編集・削除ボタン */
+.edit-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ゴミ箱（裏側） */
+.swipe-bg {
+  position: absolute;
+  inset: 0;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+
+  background: #ff5252;
+  
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 20px;
+  font-size: 22px;
+  
+  border-radius: 12px;
+  
+  transform-origin: center;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* 表側 */
+.item-content {
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  transform-origin: center;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+/* ボタン共通 */
+button {
+  font-size: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+/* アイコン関連 */
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.tag {
+  background: #f1f8e9;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.name {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.amount,
+.result-amount {
+  font-family: system-ui, sans-serif;
+  font-weight: bold;
+  color: #cd5c5c;
+}
+
+/* =========================
+   モーダル全体（背景）
+========================= */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+
+  justify-content: center;
+  align-items: center;
+  
+  z-index: 9999;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* =========================
+   モーダル中身
+========================= */
+.modal-content {
+  background: #ffffe0; /* うっすいクリーム色 */
+  padding: 20px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  border: 2px solid #d7ccc8;     /* 薄い茶色枠追加 */
+  box-shadow: none;    
+  text-align: center;
+  
+  position: relative;
+  z-index: 10000;
+}
+
+/* タイトル */
+.modal-content h3 {
+  margin-bottom: 15px;
+}
+
+/* 入力（縦並び） */
+.modal-content select,
+.modal-content input {
+  width: 100%;
+  margin: 10px 0;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  color: #5d4037; /* 茶色 */
+}
+/* プレースホルダー */
+.modal-content input::placeholder {
+  color: #a1887f;                /* ← 薄い茶色 */
+}
+
+/* フォーカス時も揃える */
+.modal-content input:focus,
+.modal-content select:focus {
+  outline: none;
+  border: 2px solid #a5d6a7;   
+}
+
+/* =========================
+   ボタンエリア（横並び）
+========================= */
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* ボタン共通 */
+.modal-buttons button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* キャンセル */
+.cancel-btn {
+  background: #e0e0e0;
+  color: #5d4037;
+}
+
+/* 保存 */
+.save-btn {
+  background: #81c784;
+  color: white;
+}
+
+/* ログ時刻表示 */
+.debug-time {
+  font-size: 12px;
+  color: #d7ccc8;
+  text-align: right;
+  margin: 5px 5px 10px 0;
+}
+
+/* ログインの時のボタン */
+#loginScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center; /* 横中央 */
+  align-items: center;     /* 縦中央 */
+
+  background: #e8f5e9; /* 今の背景と同じ */
+  z-index: 9999;
+}
+
+.login-btn {
+  width: 50%;              
+  max-width: 300px;        
+
+  background:#d7ccc8;
+  color:#5d4037;
+  font-weight:bold;
+  border:none;
+  padding:18px 0;
+  border-radius:12px;
+  font-size:20px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+
+  text-align: center;
+}
+
+/* ローディング */
+#loading {
+  position: fixed;
+  inset: 0;
+  background: #e8f5e9;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+  
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.loading-box {
+  text-align: center;
+}
+
+/* ローディングの時のロゴ */
+.loading-logo {
+  width: 120px;
+  margin-bottom: 20px;
+}
+
+/* ローディング終了時のふわっと消える感じ */
+#loading.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* くるくる */
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 4px solid #d7ccc8;
+  border-top: 4px solid #81c784;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  
+<div id="loading">
+  <div class="loading-box">
+    <img src="https://i.imgur.com/OkxQHEM.jpg" class="loading-logo">
+    <div class="spinner"></div>
+    <p>読み込み中...</p>
+  </div>
+</div>
+  
+<div id="loginScreen" style="display:none;">
+  <button onclick="login()" class="login-btn">
+    ログイン
+  </button>
+</div>
+<div id="uidBox" style="display:none;"></div>
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <img src="https://i.imgur.com/OkxQHEM.jpg" 
+       alt="サイトロゴ" 
+       style="max-width: 100%; height: auto; max-height: 120px;">
+</div>
+
+<div id="app" style="display:none;">
+<div class="input-card">
+
+  <div class="row">
+  <select id="payer">
+    <option value="A">はるきが</option>
+    <option value="B">しゅりが</option>
+  </select>
+
+  <select id="target">
+    <option value="AB">2人分</option>
+    <option value="A">はるき分</option>
+    <option value="B">しゅり分</option>
+  </select>
+</div>
+
+  <input type="number" id="amount" placeholder="金額">
+
+  <input type="text" id="memo" placeholder="メモ">
+
+<button id="mainBtn" onclick="addOrUpdate()">追加</button>
+<div id="debugTime" class="debug-time"></div>
+</div>
+
+<p id="result" class="result-box">まだデータがありません</p>
+
+<h2>----- Detailed list -----</h2>
+
+<ul id="list"></ul>
+<div style="text-align: right;">
+  <button onclick="clearAll()" 
+    style="background:#ef9a9a; color:white; font-weight:bold;">
+    reset
+  </button>
+</div>
+
+
+</div>
+
+<script type="module">
+import { firebaseConfig } from "./firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+import { 
+  getAuth, 
+  signInWithPopup,
+  GoogleAuthProvider, 
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+// Firebase初期化
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+const expensesRef = collection(db, "expenses");
+
+// グローバル変数として公開
+window.db = db;
+window.expensesRef = expensesRef;
+
+// 初期表示
+document.getElementById("uidBox").innerText = "未ログイン";
+
+// ログイン処理
+window.login = function () {
+  updateTime("ログイン開始");
+  signInWithPopup(auth, provider)  // ← signInWithRedirect を signInWithPopup に変更
+    .then((result) => {
+      console.log("ポップアップログイン成功:", result.user.uid);
+      document.getElementById("uidBox").innerText = "UID: " + result.user.uid;
+    })
+    .catch((error) => {
+      console.error("ポップアップログインエラー:", error);
+      document.getElementById("uidBox").innerText = "エラー: " + error.message;
+    });
+};
+
+
+
+// 認証状態の変化を監視（基本は自動ログイン。タイムアウトとかでログイン作業しなきゃいけない時だけ、ボタンを表示する）
+let isAuthChecked = false;
+
+onAuthStateChanged(auth, (user) => {
+  const loginScreen = document.getElementById("loginScreen");
+  const app = document.getElementById("app");
+  const loading = document.getElementById("loading");
+
+  if (user) {
+    document.getElementById("uidBox").innerText = "UID: " + user.uid;
+
+    loginScreen.style.display = "none";
+    app.style.display = "block";
+
+    startListener();
+
+  } else {
+    document.getElementById("uidBox").innerText = "未ログイン";
+
+    loginScreen.style.display = "flex";
+    app.style.display = "none";
+
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = null;
+    }
+  }
+
+  // ★ローディングはここで1回だけ消す
+  setTimeout(() => {
+    loading.classList.add("hide");
+  }, 300);
+
+});
+
+
+// 表示用
+let unsubscribe = null;
+let dataList = [];
+let editId = null;
+
+// アイコンの関数（上はるきくん、下しゅり）
+function getIcon(payer) {
+  return payer === "A"
+    ? "https://i.imgur.com/AjnIVgE.jpg"
+    : "https://i.imgur.com/k3uE2oU.jpg";
+}
+
+// 名前変換
+function getName(payer) {
+  return payer === "A" ? "はるき" : "しゅり";
+}
+
+// 金額で3桁区切りのカンマをつける処理
+function formatMoney(num) {
+  return num.toLocaleString();
+}
+
+// リアルタイム同期
+function startListener() {
+
+  if (unsubscribe) {
+    unsubscribe();
+  }
+
+  unsubscribe = onSnapshot(expensesRef, (snapshot) => {
+
+    updateTime("DB更新");
+
+    dataList = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }));
+    
+    dataList.sort((a, b) => {
+      const timeA = a.createdAt || 0;
+      const timeB = b.createdAt || 0;
+      return timeB - timeA;
+    });
+
+    render();
+  });
+}
+// 表示
+// 表示
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  let balance = 0;
+
+  dataList.forEach((d) => {
+  const li = document.createElement("li");
+
+  li.innerHTML = `
+    <div class="item-content">
+      <div class="item-top">
+        <div class="user">
+          <img src="${getIcon(d.payer)}" class="icon">
+          <span class="tag">${getName(d.payer)}</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="amount">${formatMoney(d.amount)}円</div>
+          <button class="edit-btn" onclick="editItem('${d.id}')">✏️</button>
+        </div>
+      </div>
+
+      <div class="memo">
+        ${d.memo}
+        ${getTargetIcons(d.target || "AB")}
+      </div>
+    </div>
+
+    <div class="swipe-bg">
+      🗑️
+    </div>
+  `;
+
+  list.appendChild(li);
+  addSwipeDelete(li, d.id);
+
+  // 計算
+  const amount = Number(d.amount);
+  const target = d.target || "AB";
+
+  if (target === "AB") {
+    if (d.payer === "A") {
+      balance += amount / 2;
+    } else {
+      balance -= amount / 2;
+    }
+  } else if (target === "A") {
+    if (d.payer === "B") {
+      balance -= amount;
+    }
+  } else if (target === "B") {
+    if (d.payer === "A") {
+      balance += amount;
+    }
+  }
+});
+
+  const haruki = `
+  <div class="result-user">
+    <img src="${getIcon("A")}" class="icon-result">
+    <div class="result-name">はるき</div>
+  </div>
+`;
+
+const shuri = `
+  <div class="result-user">
+    <img src="${getIcon("B")}" class="icon-result">
+    <div class="result-name">しゅり</div>
+  </div>
+`;
+
+  let resultText = "";
+  let color = "";
+
+  if (balance === 0) {
+  resultText = "精算なし！";
+  color = "#ddffdd";
+
+} else if (balance > 0) {
+  resultText = `
+    <div class="result-line">
+      ${shuri}
+      <div class="arrow">→</div>
+      <div class="result-amount">${formatMoney(Math.round(balance))}円</div>
+      <div class="arrow">→</div>
+      ${haruki}
+    </div>
+  `;
+  color = "#ffdddd";
+
+} else {
+  resultText = `
+    <div class="result-line">
+      ${haruki}
+      <div class="arrow">→</div>
+      <div class="result-amount">${formatMoney(Math.round(Math.abs(balance)))}円</div>
+      <div class="arrow">→</div>
+      ${shuri}
+    </div>
+  `;
+  color = "#ddddff";
+}
+
+  // 計算結果表示エリア
+  const resultEl = document.getElementById("result");
+  resultEl.innerHTML = resultText;
+  resultEl.style.backgroundColor = color;
+}
+
+// 誰のを払ったかのところ
+function getTargetText(target) {
+  if (target === "AB") return "2人分";
+  if (target === "A") return "はるき分";
+  if (target === "B") return "しゅり分";
+}
+
+// 誰のを払ったかのところのアイコン表示
+function getTargetIcons(target) {
+  if (target === "A") {
+    return `<span class="memo-icons">
+      <img src="${getIcon("A")}">
+    </span>`;
+  }
+  if (target === "B") {
+    return `<span class="memo-icons">
+      <img src="${getIcon("B")}">
+    </span>`;
+  }
+  // AB（2人分）
+  return `<span class="memo-icons">
+    <img src="${getIcon("A")}">
+    <img src="${getIcon("B")}">
+  </span>`;
+}
+
+
+// 追加 or 更新
+window.addOrUpdate = async function () {
+  try {
+    const payer = document.getElementById("payer").value;
+    const target = document.getElementById("target").value; // ←追加
+    const amount = Number(document.getElementById("amount").value);
+    const memo = document.getElementById("memo").value;
+
+    if (!amount) {
+      alert("金額を入力してね");
+      return;
+    }
+
+    const data = { payer, target, amount, memo };
+
+    if (editId === null) {
+      // 新規追加の時だけ、タイムスタンプを追加
+      data.createdAt = new Date().getTime();
+      await addDoc(expensesRef, data);
+    } else {
+      // 編集時はcreatedAtを変更しない（順番が変わらない）
+      await updateDoc(doc(db, "expenses", editId), data);
+      editId = null;
+    }
+
+    // フォームリセット
+    document.getElementById("amount").value = "";
+    document.getElementById("memo").value = "";
+
+  } catch (e) {
+    alert("Firebaseエラー：" + e.message);
+    console.log(e);
+  }
+};
+
+// 編集
+window.editItem = (id) => {
+  console.log("edit押された", id);
+
+  const d = dataList.find(item => item.id === id);
+  if (!d) return alert("データ見つからない");
+
+  editId = id;
+
+  // モーダルに値を入れる（ここが本体）
+  document.getElementById("editPayer").value = d.payer;
+  document.getElementById("editTarget").value = d.target || "AB";
+  document.getElementById("editAmount").value = d.amount;
+  document.getElementById("editMemo").value = d.memo;
+
+  // モーダル表示
+  document.getElementById("editModal").style.display = "flex";
+  document.body.classList.add("modal-open");
+};
+
+//編集したデータを保存する処理
+window.saveEdit = async function () {
+  const payer = document.getElementById("editPayer").value;
+const target = document.getElementById("editTarget").value;
+const amount = Number(document.getElementById("editAmount").value);
+const memo = document.getElementById("editMemo").value;
+  if (!editId) {
+    closeModal();
+    return;
+  }
+
+  // フォーム消してローディング表示
+  document.getElementById("editForm").style.display = "none";
+  document.getElementById("editLoading").style.display = "block";
+
+  try {
+    await updateDoc(doc(db, "expenses", editId), {
+    payer,
+    target,
+    amount,
+    memo
+  });
+
+    editId = null;
+
+    // モーダル閉じる
+    document.getElementById("editModal").style.display = "none";
+
+  } catch (e) {
+    alert("保存エラー：" + e.message);
+  } finally {
+    // 次回のために戻す
+    document.getElementById("editForm").style.display = "block";
+    document.getElementById("editLoading").style.display = "none";
+  }
+};
+
+//編集ウィンドーが閉じる処理
+window.closeModal = function () {
+document.getElementById("editModal").style.display = "none";
+document.body.classList.remove("modal-open");
+};
+
+// 削除
+window.deleteItem = async function (id) {
+  await deleteDoc(doc(db, "expenses", id));
+};
+
+//スワイプ削除
+function addSwipeDelete(li, id) {
+  let startX = 0;
+  let currentX = 0;
+  let isSwiping = false;
+  let moved = false;
+
+  const content = li.querySelector(".item-content");
+  const bg = li.querySelector(".swipe-bg");
+
+  li.addEventListener("touchstart", (e) => {
+    if (e.target.closest(".edit-btn")) return;
+
+    startX = e.touches[0].clientX;
+    isSwiping = false;
+    moved = false;
+  });
+
+  li.addEventListener("touchmove", (e) => {
+  if (e.target.closest(".edit-btn")) return;
+
+  currentX = e.touches[0].clientX;
+  const diff = currentX - startX;
+
+  if (Math.abs(diff) > 15) {
+    isSwiping = true;
+    moved = true;
+  }
+
+  if (isSwiping && diff < 0) {
+  content.style.transition = "none";
+  content.style.transform = `translateX(${diff}px)`;
+  }
+});
+
+li.addEventListener("touchend", async () => {
+  const diff = currentX - startX;
+
+  if (!moved) return;
+
+content.style.transition = "0.25s";
+
+if (diff < -80) {
+
+  li.style.height = li.offsetHeight + "px";
+
+  requestAnimationFrame(() => {
+    li.style.transition = "height 0.4s ease, opacity 0.4s ease";
+    
+    li.style.height = "0px";
+    li.style.opacity = "0";
+    li.style.transform = "scaleY(0)";
+
+    bg.style.opacity = "0";
+  });
+
+  setTimeout(async () => {
+    await deleteItem(id);
+  }, 600);
+
+} else {
+  content.style.transform = "translateX(0)";
+  content.style.opacity = "1";
+}
+});
+}
+
+// 全削除
+window.clearAll = async function () {
+  if (!confirm("全部消す？")) return;
+
+  const snapshot = await getDocs(expensesRef);
+  snapshot.forEach(async (d) => {
+    await deleteDoc(doc(db, "expenses", d.id));
+  });
+};
+
+//ログ時刻表示用
+function updateTime(label = "") {
+  const now = new Date();
+  const time =
+    now.getHours().toString().padStart(2, "0") + ":" +
+    now.getMinutes().toString().padStart(2, "0") + ":" +
+    now.getSeconds().toString().padStart(2, "0");
+
+  document.getElementById("debugTime").innerText =
+    "最終更新: " + time + (label ? "（" + label + "）" : "");
+}
+
+</script>
+
+<script>
+// エラーをキャッチして画面に表示
+window.addEventListener('error', (event) => {
+  console.error('エラー:', event.error);
+  document.getElementById("uidBox").innerText = "エラー: " + event.error.message;
+});
+
+// Promise のエラーもキャッチ
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Promise エラー:', event.reason);
+  document.getElementById("uidBox").innerText = "Promise エラー: " + event.reason;
+});
+</script>
+
+<script>
+window.onerror = function(message) {
+  alert("エラー発生： " + message);
+};
+</script>
+
+
+<!-- 編集モーダル -->
+<div id="editModal" class="modal">
+
+  <div class="modal-content">
+  <div id="editForm">
+  <h3>編集</h3>
+
+  <select id="editPayer">
+    <option value="A">はるき</option>
+    <option value="B">しゅり</option>
+  </select>
+
+  <select id="editTarget">
+    <option value="AB">2人分</option>
+    <option value="A">はるき分</option>
+    <option value="B">しゅり分</option>
+  </select>
+
+    <input type="number" id="editAmount" placeholder="金額">
+    <input type="text" id="editMemo" placeholder="メモ">
+
+    <div class="modal-buttons">
+      <button onclick="closeModal()" class="cancel-btn">キャンセル</button>
+      <button onclick="saveEdit()" class="save-btn">保存</button>
+    </div>
+
+    <!-- ローディング -->
+    <div id="editLoading" style="display:none;">
+      <img src="https://i.imgur.com/3VFVwcg.jpg" class="loading-logo">
+      <div class="spinner"></div>
+      <p>編集を保存中...</p>
+    </div>
+
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
